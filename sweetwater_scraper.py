@@ -26,6 +26,9 @@ def get_synths(num, verbose):
     driver.find_element_by_xpath(view_all).click()
     
     synths = []
+    products = []
+    items = []
+    tech_specs = []
     
     while len(synths) < num:  
         time.sleep(3)     
@@ -37,7 +40,7 @@ def get_synths(num, verbose):
             if len(synths) >= num:
                 break
 
-            products[len(synths)].click()
+            products[len(products)-1].click()
             time.sleep(1)
             collected_successfully = False
             
@@ -51,13 +54,24 @@ def get_synths(num, verbose):
                 except NoSuchElementException:
                     rating = -1    
                 try:
-                    brand = driver.find_element_by_xpath('/html/head/meta[23]').text
+                    brand = driver.find_element_by_xpath('//*[@id="store-detail"]/div[1]/header/div/h1/span[3]/span').text
                 except NoSuchElementException:
                     brand = -1
                 try:
-                    tech_specs = driver.find_element_by_xpath('//*[@id="store-detail"]/section[3]/ul').get_attribute('outerHTML')
+                    t_s = driver.find_element_by_xpath('//*[@id="store-detail"]/section[2]/ul')
+                    items = t_s.find_elements_by_tag_name('li')
+                    for item in items:
+                        tech_specs.append(item)
+                    #    print(item.text)
                 except NoSuchElementException:
                     tech_specs = -1
+                try:
+                    img = driver.find_element_by_xpath('//*[@id="store-detail"]/div[1]/section[1]/div/div/a/div[1]/img').get_attribute('src')
+                    image = img
+                #    img = i_g.find_element_by_('src')
+                #    print(img.text)
+                except NoSuchElementException:
+                    img = -1
                 try:
                     price = driver.find_element_by_xpath('//*[@id="product-options"]/div[1]/div/div[1]/price').text
                     collected_successfully = True
@@ -81,19 +95,21 @@ def get_synths(num, verbose):
 
             #Printing for debugging
             if verbose:
-                print("Price: {}".format(price))
-                print("Savings: {}".format(savings))
-                print("Rating: {}".format(rating))
-                print("Brand: {}".format(brand))
-                print("Tech Specs: {}".format(tech_specs))
-              # print("Location: {}".format(location))    
+                print(f'Price: {price}')
+                print(f'Savings: {savings}')
+                print(f'Rating: {rating}')
+                print(f'Brand: {brand}')
+                print(f'Tech Specs: {tech_specs}')
+                print(f'Image: {image}')    
                     
-            synths.append({"Price" : price,
-            "Savings" : savings,
-            "Rating" : rating,
-            "Brand" : brand,
-            "Tech Specs" : tech_specs})
-
+            synths.append({'Price' : price,
+            'Savings' : savings,
+            'Rating' : rating,
+            'Brand' : brand,
+            'Tech Specs' : tech_specs,
+            'Image' : image})
+      #      synths.extend(tech_specs)
+      
     return pd.DataFrame(synths)
         
         
